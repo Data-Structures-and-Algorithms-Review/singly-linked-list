@@ -6,17 +6,24 @@ class SinglyLinkedList {
 public : 
 
     struct Node { 
-        int data; 
+        T data; 
         Node *next; 
+
+        Node(const T& value) : data(value), next(nullptr) {}
     };
 
     Node *head;
-    int length;
-    size_t size;
+    size_t length;
 
-    SinglyLinkedList(); 
+    SinglyLinkedList() : head(nullptr), length(0) {}
     ~SinglyLinkedList(); 
 
+    template <size_t N>
+    SinglyLinkedList(const T& (values)[N]) : head(nullptr), length(0) {
+        for (int i = 0; i < N; ++i) {
+            append(values[i]);
+        }
+    }
     
     void append(const T& value);
     void push(const T& value);
@@ -57,6 +64,7 @@ public :
              ++iter;
          }
     */
+
     class iterator {
         Node *current;
     public:
