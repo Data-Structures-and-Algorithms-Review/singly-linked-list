@@ -1,77 +1,265 @@
-#include "SinglyLinkedList.cpp"
+#ifndef SINGLYLINKEDLIST_H
+#define SINGLYLINKEDLIST_H
+
+#include <memory>
+#include <iostream>
 
 template <typename T>
-class SinglyLinkedList { 
+class SinglyLinkedList {
 
-public : 
-
-    struct Node { 
-        T data; 
-        Node *next; 
+private:
+    struct Node {
+        T data;
+        std::unique_ptr<Node> next;
 
         Node(const T& value) : data(value), next(nullptr) {}
     };
 
-    Node *head;
+    std::unique_ptr<Node> head;
+
+    std::unique_ptr<Node> iter_to_index(int index);
+
+public:
     size_t length;
 
-    SinglyLinkedList() : head(nullptr), length(0) {}
-    ~SinglyLinkedList(); 
+    SinglyLinkedList();
+    ~SinglyLinkedList();
 
     template <size_t N>
-    SinglyLinkedList(const T& (values)[N]) : head(nullptr), length(0) {
-        for (int i = 0; i < N; ++i) {
-            append(values[i]);
-        }
-    }
-    
+    SinglyLinkedList(const T (&values)[N]);
+
     void append(const T& value);
     void push(const T& value);
     void insert(int index, const T& value);
     void remove(int index);
     void clear();
-    T pop();
-
+    T pop(int index);
     void print();
     bool isEmpty();
-    bool contains(const T& value); 
-    T get(int index); 
-
-
+    bool contains(const T& value);
+    T get(int index);
+    std::unique_ptr<Node> getNode(int index);
     int firstIndexOf(const T& value);
     int lastIndexOf(const T& value);
-    void remove(const T& value);
-    
+    void removeAll(const T& value);
+    void set(int index, const T& value);
 
-    
-    void set(int index, const T& value); 
-
-    
-    void insert(int index, const T& value); 
-
-    
-
-    int firstIndexOf(const T& value);
-    int lastIndexOf(const T& value);
-    void removeFirst(const T& value);
-
-
-    /*
-         Example iterator usage: 
-         SinglyLinkedList::Iterator iter = list.begin();
-`         while (iter != list.end()) {
-             cout << *iter << endl;
-             ++iter;
-         }
-    */
-
-    class iterator {
-        Node *current;
-    public:
-        iterator(Node *n) : current(n) {}
-        iterator operator++() { current = current->next; return *this; }
-        bool operator!=(const iterator& it) { return current != it.current; }
-        int operator*() { return current->data; }
-    };
-
+    SinglyLinkedList<T>& operator+=(const T& value);
+    SinglyLinkedList<T>& operator+(const T &value);
+    SinglyLinkedList<T>& operator=(const SinglyLinkedList<T>& other);
 };
+
+template<typename T>
+SinglyLinkedList<T>& SinglyLinkedList<T>::operator+=(const T& value) {
+    append(value);
+    return *this;
+}
+
+template<typename T>
+SinglyLinkedList<T>& SinglyLinkedList<T>::operator+(const T& value){
+    append(value);
+    return *this;
+}
+
+template<typename T>
+SinglyLinkedList<T>& SinglyLinkedList<T>::operator=(const SinglyLinkedList<T>& other) {
+    clear();
+    for (int i = 0; i < other.length; ++i) {
+        append(other.get(i));
+    }
+    return *this;
+}
+
+template<typename T>
+std::unique_ptr<typename SinglyLinkedList<T>::Node> SinglyLinkedList<T>::iter_to_index(int index) {
+    std::unique_ptr<Node> current = head;
+
+    for (int i = 0; i <= index; ++i) {
+        current = current->next;
+    }
+    return current;
+}
+
+template<typename T>
+SinglyLinkedList<T>::SinglyLinkedList() : head(nullptr), length(0) {}
+
+template<typename T>
+SinglyLinkedList<T>::~SinglyLinkedList() {
+    clear();
+}
+
+template<typename T>
+template<size_t N>
+SinglyLinkedList<T>::SinglyLinkedList(const T (&values)[N]) : head(nullptr), length(0) {
+    for (int i = 0; i < N; ++i) {
+        append(values[i]);
+    }
+}
+
+template<typename T>
+void SinglyLinkedList<T>::append(const T& value) {
+    std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
+    std::unique_ptr<Node> current = head;
+    for (int i = 0; i < length; ++i) {
+        current = current->next;
+    }
+    current->next = std::move(new_node);
+    ++length;
+}
+
+template<typename T>
+void SinglyLinkedList<T>::push(const T& value) {
+    std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
+    new_node->next = std::move(head);
+    head = std::move(new_node);
+    ++length;
+}
+
+template<typename T>
+void SinglyLinkedList<T>::insert(int index, const T& value) {
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
+    std::unique_ptr<Node> current_node = iter_to_index(index);
+    new_node->next = std::move(current_node->next);
+    current_node->next = std::move(new_node);
+    ++length;
+}
+
+template<typename T>
+void SinglyLinkedList<T>::remove(int index) {
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::unique_ptr<Node> node_before = iter_to_index(index - 1);
+    std::unique_ptr<Node> node_to_remove = std::move(node_before->next);
+    node_before->next = std::move(node_to_remove->next);
+    --length;
+}
+
+template<typename T>
+void SinglyLinkedList<T>::clear() {
+    head->next = nullptr; // std::unique_ptr handles deallocations automatically once the other nodes go out of scope
+}
+
+template<typename T>
+T SinglyLinkedList<T>::pop(int index) {
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::unique_ptr<Node> node_before = iter_to_index(index - 1);
+    std::unique_ptr<Node> node_to_remove = std::move(node_before->next);
+    node_before->next = std::move(node_to_remove->next);
+    --length;
+    return node_to_remove->data;
+}
+
+template<typename T>
+void SinglyLinkedList<T>::print() {
+    std::unique_ptr<Node> current = head;
+    for (int i = 0; i < length; ++i) {
+        std::cout << current->data << " ";
+        current = current->next;
+    }
+    std::cout << std::endl;
+}
+
+template<typename T>
+bool SinglyLinkedList<T>::isEmpty() {
+    return (length == 0);
+}
+
+template<typename T>
+bool SinglyLinkedList<T>::contains(const T& value) {
+    std::unique_ptr<Node> current = head;
+    for (int i = 0; i < length; ++i) {
+        if (current->data == value) {
+            return true;
+        }
+        current = current->next;
+    }
+    return false;
+}
+
+template<typename T>
+T SinglyLinkedList<T>::get(int index) {
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::unique_ptr<Node> node_at_index = iter_to_index(index);
+    return node_at_index->data;
+}
+
+template<typename T>
+std::unique_ptr<typename SinglyLinkedList<T>::Node> SinglyLinkedList<T>::getNode(int index) {
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::unique_ptr<Node> node_at_index = iter_to_index(index);
+    return node_at_index;
+}
+
+template<typename T>
+int SinglyLinkedList<T>::firstIndexOf(const T& value) {
+    std::unique_ptr<Node> current = head;
+
+    for (int i = 0; i < length; ++i) {
+        if (current->data == value) {
+            return i;
+        }
+        current = current->next;
+    }
+    return -1;
+}
+
+template<typename T>
+int SinglyLinkedList<T>::lastIndexOf(const T& value) {
+    std::unique_ptr<Node> current = head;
+    int last_index = -1;
+
+    for (int i = 0; i < length; ++i) {
+        if (current->data == value) {
+            last_index = i;
+        }
+        current = current->next;
+    }
+    return last_index;
+}
+
+template<typename T>
+void SinglyLinkedList<T>::removeAll(const T& value) {
+    std::unique_ptr<Node> current = head;
+    std::unique_ptr<Node> prev = nullptr;
+
+    for (int i = 0; i < length; ++i) {
+        if (current->data == value) {
+            if (prev == nullptr) {
+                head = std::move(current->next);
+            } else {
+                prev->next = std::move(current->next);
+            }
+            --length;
+        } else {
+            prev = current;
+        }
+        current = current->next;
+    }
+}
+
+template<typename T>
+void SinglyLinkedList<T>::set(int index, const T& value) {
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::unique_ptr<Node> node_at_index = iter_to_index(index);
+    node_at_index->data = value;
+}
+
+#endif  // SINGLYLINKEDLIST_H
