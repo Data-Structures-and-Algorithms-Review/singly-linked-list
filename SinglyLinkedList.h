@@ -1,5 +1,4 @@
 #include "SinglyLinkedList.cpp"
-#include <memory>
 
 template <typename T>
 class SinglyLinkedList { 
@@ -66,5 +65,5 @@ public :
         bool operator!=(const iterator& it) { return current != it.current; }
         int operator*() { return current->data; }
     };
-    
+
 };
