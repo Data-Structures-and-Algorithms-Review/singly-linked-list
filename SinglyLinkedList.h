@@ -72,6 +72,11 @@ SinglyLinkedList<T>& SinglyLinkedList<T>::operator=(const SinglyLinkedList<T>& o
 
 template<typename T>
 std::unique_ptr<typename SinglyLinkedList<T>::Node> SinglyLinkedList<T>::iter_to_index(int index) {
+
+    if (index < 0 || index >= length) {
+        throw std::out_of_range("Index out of range");
+    }
+
     std::unique_ptr<Node> current = head;
 
     for (int i = 0; i <= index; ++i) {
@@ -117,9 +122,7 @@ void SinglyLinkedList<T>::push(const T& value) {
 
 template<typename T>
 void SinglyLinkedList<T>::insert(int index, const T& value) {
-    if (index < 0 || index >= length) {
-        throw std::out_of_range("Index out of range");
-    }
+
 
     std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
     std::unique_ptr<Node> current_node = iter_to_index(index);
@@ -130,9 +133,7 @@ void SinglyLinkedList<T>::insert(int index, const T& value) {
 
 template<typename T>
 void SinglyLinkedList<T>::remove(int index) {
-    if (index < 0 || index >= length) {
-        throw std::out_of_range("Index out of range");
-    }
+
 
     std::unique_ptr<Node> node_before = iter_to_index(index - 1);
     std::unique_ptr<Node> node_to_remove = std::move(node_before->next);
@@ -147,9 +148,7 @@ void SinglyLinkedList<T>::clear() {
 
 template<typename T>
 T SinglyLinkedList<T>::pop(int index) {
-    if (index < 0 || index >= length) {
-        throw std::out_of_range("Index out of range");
-    }
+
 
     std::unique_ptr<Node> node_before = iter_to_index(index - 1);
     std::unique_ptr<Node> node_to_remove = std::move(node_before->next);
@@ -187,9 +186,7 @@ bool SinglyLinkedList<T>::contains(const T& value) {
 
 template<typename T>
 T SinglyLinkedList<T>::get(int index) {
-    if (index < 0 || index >= length) {
-        throw std::out_of_range("Index out of range");
-    }
+
 
     std::unique_ptr<Node> node_at_index = iter_to_index(index);
     return node_at_index->data;
@@ -197,9 +194,7 @@ T SinglyLinkedList<T>::get(int index) {
 
 template<typename T>
 std::unique_ptr<typename SinglyLinkedList<T>::Node> SinglyLinkedList<T>::getNode(int index) {
-    if (index < 0 || index >= length) {
-        throw std::out_of_range("Index out of range");
-    }
+
 
     std::unique_ptr<Node> node_at_index = iter_to_index(index);
     return node_at_index;
@@ -254,9 +249,7 @@ void SinglyLinkedList<T>::removeAll(const T& value) {
 
 template<typename T>
 void SinglyLinkedList<T>::set(int index, const T& value) {
-    if (index < 0 || index >= length) {
-        throw std::out_of_range("Index out of range");
-    }
+
 
     std::unique_ptr<Node> node_at_index = iter_to_index(index);
     node_at_index->data = value;
