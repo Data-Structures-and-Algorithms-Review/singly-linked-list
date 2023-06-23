@@ -28,11 +28,11 @@ public:
     template <size_t N>
     SinglyLinkedList(const T (&values)[N]);
 
-    void append(const T& value);
-    void push(const T& value);
-    void insert(int index, const T& value);
-    void remove(int index);
-    void clear();
+    SinglyLinkedList<T>& append(const T& value);
+    SinglyLinkedList<T>& push(const T& value);
+    SinglyLinkedList<T>& insert(int index, const T& value);
+    SinglyLinkedList<T>& remove(int index);
+    SinglyLinkedList<T>& clear();
     T pop(int index);
     void print();
     bool isEmpty();
@@ -41,8 +41,8 @@ public:
     std::unique_ptr<Node> getNode(int index);
     int firstIndexOf(const T& value);
     int lastIndexOf(const T& value);
-    void removeAll(const T& value);
-    void set(int index, const T& value);
+    SinglyLinkedList<T>& removeAll(const T& value);
+    SinglyLinkedList<T>& set(int index, const T& value);
 
     SinglyLinkedList<T>& operator+=(const T& value);
     SinglyLinkedList<T>& operator+(const T &value);
@@ -102,7 +102,7 @@ SinglyLinkedList<T>::SinglyLinkedList(const T (&values)[N]) : head(nullptr), len
 }
 
 template<typename T>
-void SinglyLinkedList<T>::append(const T& value) {
+SinglyLinkedList<T>& SinglyLinkedList<T>::append(const T& value) {
     std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
     std::unique_ptr<Node> current = head;
     for (int i = 0; i < length; ++i) {
@@ -113,7 +113,7 @@ void SinglyLinkedList<T>::append(const T& value) {
 }
 
 template<typename T>
-void SinglyLinkedList<T>::push(const T& value) {
+SinglyLinkedList<T>& SinglyLinkedList<T>::push(const T& value) {
     std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
     new_node->next = std::move(head);
     head = std::move(new_node);
@@ -121,7 +121,7 @@ void SinglyLinkedList<T>::push(const T& value) {
 }
 
 template<typename T>
-void SinglyLinkedList<T>::insert(int index, const T& value) {
+SinglyLinkedList<T>& SinglyLinkedList<T>::insert(int index, const T& value) {
 
 
     std::unique_ptr<Node> new_node = std::make_unique<Node>(value);
@@ -132,7 +132,7 @@ void SinglyLinkedList<T>::insert(int index, const T& value) {
 }
 
 template<typename T>
-void SinglyLinkedList<T>::remove(int index) {
+SinglyLinkedList<T>& SinglyLinkedList<T>::remove(int index) {
 
 
     std::unique_ptr<Node> node_before = iter_to_index(index - 1);
@@ -142,7 +142,7 @@ void SinglyLinkedList<T>::remove(int index) {
 }
 
 template<typename T>
-void SinglyLinkedList<T>::clear() {
+SinglyLinkedList<T>& SinglyLinkedList<T>::clear() {
     head->next = nullptr; // std::unique_ptr handles deallocations automatically once the other nodes go out of scope
 }
 
@@ -228,7 +228,7 @@ int SinglyLinkedList<T>::lastIndexOf(const T& value) {
 }
 
 template<typename T>
-void SinglyLinkedList<T>::removeAll(const T& value) {
+SinglyLinkedList<T>& SinglyLinkedList<T>::removeAll(const T& value) {
     std::unique_ptr<Node> current = head;
     std::unique_ptr<Node> prev = nullptr;
 
@@ -248,7 +248,7 @@ void SinglyLinkedList<T>::removeAll(const T& value) {
 }
 
 template<typename T>
-void SinglyLinkedList<T>::set(int index, const T& value) {
+SinglyLinkedList<T>& SinglyLinkedList<T>::set(int index, const T& value) {
 
 
     std::unique_ptr<Node> node_at_index = iter_to_index(index);
